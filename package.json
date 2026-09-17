@@ -1,0 +1,71 @@
+{
+  "name": "quiz-maker",
+  "productName": "Quiz Maker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AI quiz generator for tutors - single-user Electron desktop app",
+  "author": "Nav Virdi <nav@Liberated.Info>",
+  "main": "electron/main.js",
+  "scripts": {
+    "postinstall": "prisma generate",
+    "dev": "concurrently -k -n VITE,ELECTRON -c cyan,magenta \"npm:dev:vite\" \"npm:dev:electron\"",
+    "dev:vite": "npm run dev --prefix frontend",
+    "dev:electron": "wait-on http://localhost:5173 && cross-env NODE_ENV=development electron .",
+    "build:renderer": "npm run build --prefix frontend",
+    "build": "prisma generate && node scripts/scrub-prisma-paths.js && npm run db:template && npm run build:renderer && electron-builder",
+    "db:template": "cross-env DATABASE_URL=file:./template.db prisma migrate deploy",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.16.3",
+    "axios": "^1.12.2",
+    "dotenv": "^17.2.3"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0",
+    "cross-env": "^7.0.3",
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8",
+    "prisma": "^6.16.3",
+    "wait-on": "^8.0.1"
+  },
+  "build": {
+    "appId": "com.quizmaker.app",
+    "productName": "Quiz Maker",
+    "copyright": "© 2026 Nav Virdi — Liberated.Info",
+    "files": [
+      "electron/**/*",
+      "frontend/dist/**/*",
+      "prisma/schema.prisma",
+      "node_modules/**/*",
+      "package.json"
+    ],
+    "asarUnpack": [
+      "electron/prisma-client/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "prisma",
+        "to": "prisma",
+        "filter": [
+          "**/*",
+          "!dev.db"
+        ]
+      }
+    ],
+    "mac": {
+      "target": "dmg",
+      "category": "public.app-category.education"
+    },
+    "win": {
+      "target": "nsis"
+    }
+  },
+  "allowScripts": {
+    "@prisma/client@6.19.3": true,
+    "@prisma/engines@6.19.3": true,
+    "electron@33.4.11": true,
+    "prisma@6.19.3": true
+  }
+}
